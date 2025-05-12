@@ -34,7 +34,7 @@ jobs:
         uses: docker/login-action@6d4b68b490aef8836e8fb5e50ee7b3bdfa5894f0 #v3.3.0
         with:
           registry: ghcr.io
-          username: ${{ github.repository_owner }}
+          username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
       - name: Prepare
         id: prep
@@ -58,7 +58,7 @@ jobs:
           builder: ${{ steps.buildx.outputs.name }}
           context: .
           file: ./Dockerfile
-          platforms: linux/amd64 #,linux/arm64,linux/arm/v7
+          platforms: linux/amd64
           tags: ghcr.io/t1mt/artifact-registry:${{ steps.prep.outputs.VERSION }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: Sign the image with Cosign
@@ -69,8 +69,8 @@ jobs:
         run: |
           HELM_VERSION=${{ steps.prep.outputs.VERSION }}
           HELM_VERSION=${HELM_VERSION#v}
-          rm charts/t1mt/artifacthub-repo.yml
-          yq -i '.image.digest = "${{ steps.build.outputs.DIGEST }}"' charts/t1mt/values.yaml
+          yq -i '.image.repository = "ghcr.io/t1mt/artifact-registry"' helm/artifact-registry/values.yaml
+          yq -i '.image.tag = "${{ steps.build.outputs.DIGEST }}"' helm/artifact-registry/values.yaml
           helm package --app-version ${{ steps.prep.outputs.VERSION }} --version ${HELM_VERSION} helm/artifact-registry
           helm push artifact-registry-${HELM_VERSION}.tgz oci://ghcr.io/t1mt/helm-charts 2> .digest
           DIGEST=$(cat .digest | awk -F "[, ]+" '/Digest/{print $NF}')
