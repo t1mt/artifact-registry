@@ -67,8 +67,9 @@ jobs:
       - name: Publish Helm chart to GHCR
         id: helm
         run: |
-          HELM_VERSION=${{ steps.prep.outputs.VERSION }}
-          HELM_VERSION=${HELM_VERSION#v}
+          APP_VERSION=${{ steps.prep.outputs.VERSION }}
+          HELM_VERSION=${APP_VERSION#v}
+          sed helm/artifact-registry/Chart.in.yaml -e 's|{{ CHART_VERSION }}|$(HELM_VERSION)|' -e 's|{{ APP_VERSION }}|$(APP_VERSION)|' > helm/artifact-registry/Chart.yaml
           yq -i '.image.repository = "ghcr.io/t1mt/artifact-registry"' helm/artifact-registry/values.yaml
           yq -i '.image.tag = "${{ steps.build.outputs.DIGEST }}"' helm/artifact-registry/values.yaml
           helm package --app-version ${{ steps.prep.outputs.VERSION }} --version ${HELM_VERSION} helm/artifact-registry
