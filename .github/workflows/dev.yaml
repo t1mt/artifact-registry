@@ -66,8 +66,8 @@ jobs:
           cosign sign --yes ghcr.io/t1mt/artifact-registry@${{ steps.build.outputs.DIGEST }}
       - name: Publish Helm chart to GHCR
         id: helm
+        # HELM_VERSION=${{ steps.prep.outputs.VERSION }}
         run: |
-          # HELM_VERSION=${{ steps.prep.outputs.VERSION }}
           HELM_VERSION=0.0.1
           HELM_VERSION=${HELM_VERSION#v}
           sed helm/artifact-registry/Chart.in.yaml -e 's|{{ CHART_VERSION }}|$(HELM_VERSION)|' -e 's|{{ APP_VERSION }}|$(HELM_VERSION)|' > helm/artifact-registry/Chart.yaml
