@@ -63,19 +63,19 @@ jobs:
       - name: Sign the image with Cosign
         run: |
           cosign sign --yes ghcr.io/t1mt/artifact-registry@${{ steps.build.outputs.DIGEST }}
-      - name: Publish Helm chart to GHCR
-        id: helm
-        # HELM_VERSION=${{ steps.prep.outputs.VERSION }}
-        run: |
-          HELM_VERSION=0.0.1-${{ steps.prep.outputs.VERSION }}
-          HELM_VERSION=${HELM_VERSION#v}
-          sed helm/artifact-registry/Chart.in.yaml -e 's|{{ CHART_VERSION }}|$(HELM_VERSION)|' -e 's|{{ APP_VERSION }}|$(HELM_VERSION)|' > helm/artifact-registry/Chart.yaml
-          yq -i '.image.repository = "ghcr.io/t1mt/artifact-registry"' helm/artifact-registry/values.yaml
-          yq -i '.image.tag = "${{ steps.build.outputs.DIGEST }}"' helm/artifact-registry/values.yaml
-          helm package --app-version ${HELM_VERSION} --version ${HELM_VERSION} helm/artifact-registry
-          helm push artifact-registry-${HELM_VERSION}.tgz oci://ghcr.io/t1mt/artifact-registry 2> .digest
-          DIGEST=$(cat .digest | awk -F "[, ]+" '/Digest/{print $NF}')
-          echo "DIGEST=${DIGEST}" >> $GITHUB_OUTPUT
-      - name: Sign the Helm chart with Cosign
-        run: |
-          cosign sign --yes ghcr.io/t1mt/artifact-registry/artifact-registry@${{ steps.helm.outputs.DIGEST }}
+      # - name: Publish Helm chart to GHCR
+      #   id: helm
+      #   # HELM_VERSION=${{ steps.prep.outputs.VERSION }}
+      #   run: |
+      #     HELM_VERSION=0.0.1-${{ steps.prep.outputs.VERSION }}
+      #     HELM_VERSION=${HELM_VERSION#v}
+      #     sed helm/artifact-registry/Chart.in.yaml -e 's|{{ CHART_VERSION }}|$(HELM_VERSION)|' -e 's|{{ APP_VERSION }}|$(HELM_VERSION)|' > helm/artifact-registry/Chart.yaml
+      #     yq -i '.image.repository = "ghcr.io/t1mt/artifact-registry"' helm/artifact-registry/values.yaml
+      #     yq -i '.image.tag = "${{ steps.build.outputs.DIGEST }}"' helm/artifact-registry/values.yaml
+      #     helm package --app-version ${HELM_VERSION} --version ${HELM_VERSION} helm/artifact-registry
+      #     helm push artifact-registry-${HELM_VERSION}.tgz oci://ghcr.io/t1mt/artifact-registry 2> .digest
+      #     DIGEST=$(cat .digest | awk -F "[, ]+" '/Digest/{print $NF}')
+      #     echo "DIGEST=${DIGEST}" >> $GITHUB_OUTPUT
+      # - name: Sign the Helm chart with Cosign
+      #   run: |
+      #     cosign sign --yes ghcr.io/t1mt/artifact-registry/artifact-registry@${{ steps.helm.outputs.DIGEST }}
