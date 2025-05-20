@@ -31,7 +31,7 @@ const Name = "helm"
 var _ packages.Provider = (*provider)(nil)
 
 func init() {
-	// packages.Register(Name, newProvider)
+	packages.Register(Name, newProvider)
 }
 
 func newProvider(_ context.Context) (packages.Provider, error) {
