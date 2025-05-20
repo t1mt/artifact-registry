@@ -56,7 +56,7 @@ var _ storage.Repository = (*repo)(nil)
 type repo struct{}
 
 func (r *repo) Name() string {
-	return "rpm"
+	return Name
 }
 
 func (r *repo) GenerateKeypair() (private string, public string, err error) {

@@ -18,7 +18,6 @@ import (
 	"github.com/ProtonMail/go-crypto/openpgp"
 	"github.com/ProtonMail/go-crypto/openpgp/clearsign"
 	"github.com/ulikunitz/xz"
-
 	"go.linka.cloud/artifact-registry/pkg/buffer"
 	"go.linka.cloud/artifact-registry/pkg/codec"
 	openpgp2 "go.linka.cloud/artifact-registry/pkg/crypt/openpgp"
@@ -36,7 +35,7 @@ var _ storage.Repository = (*repo)(nil)
 type repo struct{}
 
 func (r *repo) Name() string {
-	return "deb"
+	return Name
 }
 
 func (r *repo) GenerateKeypair() (string, string, error) {

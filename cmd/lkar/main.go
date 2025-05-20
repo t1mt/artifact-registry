@@ -22,13 +22,12 @@ import (
 	"strings"
 
 	"github.com/spf13/cobra"
+	artifact_registry "go.linka.cloud/artifact-registry"
+	hclient "go.linka.cloud/artifact-registry/pkg/http/client"
 	"go.linka.cloud/grpc-toolkit/cli/clifmt"
 	"go.linka.cloud/grpc-toolkit/logger"
 	"go.linka.cloud/printer"
 	"oras.land/oras-go/v2/registry/remote/credentials"
-
-	artifact_registry "go.linka.cloud/artifact-registry"
-	hclient "go.linka.cloud/artifact-registry/pkg/http/client"
 )
 
 var (

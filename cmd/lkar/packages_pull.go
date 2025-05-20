@@ -21,12 +21,7 @@ import (
 	"path/filepath"
 
 	"github.com/spf13/cobra"
-
 	"go.linka.cloud/artifact-registry/pkg/packages"
-	"go.linka.cloud/artifact-registry/pkg/packages/apk"
-	"go.linka.cloud/artifact-registry/pkg/packages/deb"
-	"go.linka.cloud/artifact-registry/pkg/packages/helm"
-	"go.linka.cloud/artifact-registry/pkg/packages/rpm"
 )
 
 func newPkgPullCmd(typ string) *cobra.Command {
@@ -49,7 +44,7 @@ func newPkgPullCmd(typ string) *cobra.Command {
 				c   packages.Puller
 				err error
 			)
-			switch typ {
+			/* switch typ {
 			case apk.Name:
 				c, err = apk.NewClient(registry, repository, "", "", opts...)
 			case deb.Name:
@@ -60,7 +55,12 @@ func newPkgPullCmd(typ string) *cobra.Command {
 				c, err = helm.NewClient(registry, repository, opts...)
 			default:
 				return fmt.Errorf("unsupported package type: %s", typ)
+			} */
+			cli, err := packages.NewCmdProvider(typ)
+			if err != nil {
+				return err
 			}
+			c, err = cli.NewPull(cmd.Context()).NewClient([]string{registry, repository}, opts)
 			if err != nil {
 				return err
 			}

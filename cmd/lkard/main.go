@@ -22,13 +22,12 @@ import (
 
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"go.linka.cloud/env"
-	"go.linka.cloud/grpc-toolkit/logger"
-
 	artifact_registry "go.linka.cloud/artifact-registry"
 	"go.linka.cloud/artifact-registry/pkg/registry"
 	"go.linka.cloud/artifact-registry/pkg/server"
 	"go.linka.cloud/artifact-registry/pkg/storage"
+	"go.linka.cloud/env"
+	"go.linka.cloud/grpc-toolkit/logger"
 )
 
 const (
@@ -43,6 +42,8 @@ const (
 	EnvTLSCert      = "ARTIFACT_REGISTRY_TLS_CERT"
 	EnvTLSKey       = "ARTIFACT_REGISTRY_TLS_KEY"
 	EnvDisableUI    = "ARTIFACT_REGISTRY_DISABLE_UI"
+	EnvUser         = "ARTIFACT_REGISTRY_USER"
+	EnvPassword     = "ARTIFACT_REGISTRY_PASSWORD"
 
 	EnvProxy         = "ARTIFACT_REGISTRY_PROXY"
 	EnvProxyNoHTTPS  = "ARTIFACT_REGISTRY_PROXY_NO_HTTPS"
@@ -72,6 +73,8 @@ var (
 	clientCA string
 
 	disableUI = false
+
+	user, password string
 
 	proxyAddr     string
 	proxyNoHTTPS  = false
@@ -121,6 +124,12 @@ var (
 					logger.C(cmd.Context()).Fatal(err)
 				}
 				ropts = append(ropts, registry.WithClientCA(p))
+			}
+			if user != "" {
+				ropts = append(ropts, registry.WithUser(user))
+			}
+			if password != "" {
+				ropts = append(ropts, registry.WithPassword(password))
 			}
 			if proxyNoHTTPS {
 				ropts = append(ropts, registry.WithProxyPlainHTTP())
@@ -181,6 +190,8 @@ func main() {
 	cmd.Flags().StringVar(&cert, "tls-cert", env.Get[string](EnvTLSCert), "tls certificate [$"+EnvTLSCert+"]")
 	cmd.Flags().StringVar(&key, "tls-key", env.Get[string](EnvTLSKey), "tls key [$"+EnvTLSKey+"]")
 	cmd.Flags().BoolVar(&disableUI, "disable-ui", env.GetDefault(EnvDisableUI, disableUI), "disable the Web UI [$"+EnvDisableUI+"]")
+	cmd.Flags().StringVar(&user, "user", env.GetDefault(EnvUser, user), "registry user [$"+EnvUser+"]")
+	cmd.Flags().StringVar(&password, "password", env.GetDefault(EnvPassword, password), "registry password [$"+EnvPassword+"]")
 
 	cmd.Flags().StringVar(&proxyAddr, "proxy", env.GetDefault(EnvProxy, proxyAddr), "proxy backend registry hostname (and port if not 443 or 80) [$"+EnvProxy+"]")
 	cmd.Flags().BoolVar(&proxyNoHTTPS, "proxy-no-https", env.GetDefault(EnvProxyNoHTTPS, noHTTPS), "disable proxy registry client https [$"+EnvProxyNoHTTPS+"]")
@@ -192,7 +203,7 @@ func main() {
 	cmd.Flags().BoolVarP(&debug, "debug", "d", false, "enable debug logging")
 
 	if debug {
-		logger.SetDefault(logger.StandardLogger().SetLevel(logger.DebugLevel))
+		logger.SetDefault(logger.StandardLogger().SetLevel(logger.DebugLevel).WithReportCaller(true))
 	}
 
 	if err := cmd.Execute(); err != nil {

@@ -15,22 +15,18 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 
 	"github.com/spf13/cobra"
-
 	"go.linka.cloud/artifact-registry/pkg/packages"
-	"go.linka.cloud/artifact-registry/pkg/packages/apk"
-	"go.linka.cloud/artifact-registry/pkg/packages/deb"
-	"go.linka.cloud/artifact-registry/pkg/packages/helm"
-	"go.linka.cloud/artifact-registry/pkg/packages/rpm"
 )
 
 func newPkgPushCmd(typ string) *cobra.Command {
-	use := fmt.Sprintf("push [repository] [path]")
-	index := 1
-	var client func(args []string) (packages.Pusher, error)
+	/* use := fmt.Sprintf("push [repository] [path]")
+	index := 1 */
+	/* var client func(args []string) (packages.Pusher, error)
 	switch typ {
 	case apk.Name:
 		use = fmt.Sprintf("push [repository] [branch] [apk-repository] [path]")
@@ -54,15 +50,22 @@ func newPkgPushCmd(typ string) *cobra.Command {
 		}
 	default:
 		panic(fmt.Sprintf("unknown package type %s", typ))
+	} */
+	prvd, err := packages.NewCmdProvider(typ)
+	if err != nil {
+		panic(err)
 	}
+	cli := prvd.NewPush(context.TODO())
+	use := cli.Usage
+	index := cli.ArgsLen
 	return &cobra.Command{
 		Use:     use,
 		Short:   fmt.Sprintf("Push %s package to the repository", typ),
 		Aliases: []string{"put", "create", "upload"},
-		Args:    cobra.ExactArgs(index + 1),
+		Args:    cobra.ExactArgs(index),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
-			f, err := os.Open(args[index])
+			f, err := os.Open(args[index-1])
 			if err != nil {
 				return err
 			}
@@ -71,7 +74,8 @@ func newPkgPushCmd(typ string) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			c, err := client(args)
+			c, err := cli.NewClient(args, opts)
+			// c, err := client(args)
 			if err != nil {
 				return err
 			}

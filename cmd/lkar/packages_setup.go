@@ -19,25 +19,31 @@ import (
 	"fmt"
 	"os"
 	"runtime"
-	"strings"
 
 	"github.com/spf13/cobra"
-
 	"go.linka.cloud/artifact-registry/pkg/packages"
-	"go.linka.cloud/artifact-registry/pkg/packages/apk"
-	"go.linka.cloud/artifact-registry/pkg/packages/deb"
-	"go.linka.cloud/artifact-registry/pkg/packages/helm"
-	"go.linka.cloud/artifact-registry/pkg/packages/rpm"
 )
 
 func newPkgSetupCmd(typ string) *cobra.Command {
 	var (
-		force  bool
-		use    string
-		args   int
-		client func(ctx context.Context, scheme, name string, args []string) (packages.Setuper, error)
+		force bool
+		use   string
+		index int
+		// client func(ctx context.Context, scheme, name string, args []string) (packages.Setuper, error)
 	)
-	switch typ {
+
+	prvd, err := packages.NewCmdProvider(typ)
+	if err != nil {
+		panic(err)
+	}
+	cli := prvd.NewSetup(context.TODO())
+	if cli == nil {
+		return nil
+	}
+	index = cli.ArgsLen
+	use = cli.Usage
+
+	/* switch typ {
 	case apk.Name:
 		use = fmt.Sprintf("setup [repository] [branch] [apk-repository]")
 		args = 3
@@ -62,11 +68,11 @@ func newPkgSetupCmd(typ string) *cobra.Command {
 		client = func(ctx context.Context, scheme, name string, args []string) (packages.Setuper, error) {
 			return helm.NewClient(registry, repository, opts...)
 		}
-	}
+	} */
 	cmd := &cobra.Command{
 		Use:   use,
 		Short: fmt.Sprintf("Setup %s repository on the machine", typ),
-		Args:  cobra.ExactArgs(args),
+		Args:  cobra.ExactArgs(index),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 			if runtime.GOOS != "linux" && typ != "helm" {
@@ -76,15 +82,17 @@ func newPkgSetupCmd(typ string) *cobra.Command {
 			if os.Geteuid() != 0 && typ != "helm" {
 				return fmt.Errorf("please run as root or sudo")
 			}
-			scheme := "https"
+			/* scheme := "https"
 			if plainHTTP {
 				scheme = "http"
 			}
 			name := strings.Replace(repository, "/", "-", -1)
 			if repository == "" {
 				name = strings.Replace(strings.Split(registry, ":")[0], ".", "-", -1)
-			}
-			c, err := client(ctx, scheme, name, args)
+			} */
+
+			c, err := cli.NewClient([]string{registry, repository, args[1], args[2]}, opts)
+			// c, err := client(ctx, scheme, name, args)
 			if err != nil {
 				return err
 			}
