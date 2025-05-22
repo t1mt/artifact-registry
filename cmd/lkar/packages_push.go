@@ -21,6 +21,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"go.linka.cloud/artifact-registry/pkg/packages"
+	"go.linka.cloud/grpc-toolkit/logger"
 )
 
 func newPkgPushCmd(typ string) *cobra.Command {
@@ -74,7 +75,7 @@ func newPkgPushCmd(typ string) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			c, err := cli.NewClient(args, opts)
+			c, err := cli.NewClient(packages.NewParams(args), opts)
 			// c, err := client(args)
 			if err != nil {
 				return err
@@ -82,6 +83,7 @@ func newPkgPushCmd(typ string) *cobra.Command {
 			pw := newProgressReader(f, i.Size())
 			go pw.Run(ctx)
 			if err := c.Push(ctx, pw); err != nil {
+				logger.C(ctx).Error(err)
 				return err
 			}
 			return nil

@@ -62,7 +62,7 @@ var (
 
 func setup(cmd *cobra.Command, args []string) error {
 	if debug {
-		logger.SetDefault(logger.StandardLogger().SetLevel(logger.DebugLevel))
+		logger.SetDefault(logger.StandardLogger().SetLevel(logger.DebugLevel).WithReportCaller(true, 3))
 	}
 	if caFile != "" {
 		caPool = x509.NewCertPool()

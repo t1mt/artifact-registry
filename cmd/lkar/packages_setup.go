@@ -91,7 +91,7 @@ func newPkgSetupCmd(typ string) *cobra.Command {
 				name = strings.Replace(strings.Split(registry, ":")[0], ".", "-", -1)
 			} */
 
-			c, err := cli.NewClient([]string{registry, repository, args[1], args[2]}, opts)
+			c, err := cli.NewClient(packages.NewParams(args), opts)
 			// c, err := client(ctx, scheme, name, args)
 			if err != nil {
 				return err

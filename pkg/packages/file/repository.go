@@ -21,8 +21,6 @@ import (
 	"go.linka.cloud/artifact-registry/pkg/codec"
 	"go.linka.cloud/artifact-registry/pkg/crypt/openpgp"
 	"go.linka.cloud/artifact-registry/pkg/storage"
-	hrepo "helm.sh/helm/v3/pkg/repo"
-	"sigs.k8s.io/yaml"
 )
 
 const (
@@ -34,23 +32,13 @@ var _ storage.Repository = (*repo)(nil)
 
 type repo struct{}
 
-func (r *repo) Index(_ context.Context, _ string, artifacts ...storage.Artifact) ([]storage.Artifact, error) {
-	cs := storage.MustAs[*Package](artifacts)
-	i := hrepo.NewIndexFile()
-	for _, v := range cs {
-		if err := i.MustAdd(v.Metadata, v.Path(), "", v.PkgDigest); err != nil {
-			return nil, err
-		}
-	}
-	b, err := yaml.Marshal(i)
-	if err != nil {
-		return nil, err
-	}
-	return []storage.Artifact{storage.NewFile("index.yaml", b)}, nil
+func (r *repo) Index(ctx context.Context, key string, artifacts ...storage.Artifact) ([]storage.Artifact, error) {
+	// no index for files
+	return nil, nil
 }
 
 func (r *repo) GenerateKeypair() (string, string, error) {
-	return openpgp.GenerateKeypair("Artifact Registry", "Helm Registry", "")
+	return openpgp.GenerateKeypair("Artifact Registry", "File", "")
 }
 
 func (r *repo) KeyNames() (string, string) {

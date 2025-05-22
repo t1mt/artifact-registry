@@ -22,13 +22,10 @@ type clientProvider struct{}
 // NewDelete implements packages.CmdProvider.
 func (c clientProvider) NewDelete(ctx context.Context) *packages.Cmd {
 	cmd := &packages.Cmd{
-		NewClient: func(params []string, opts []hclient.Option) (packages.Client, error) {
-			if len(params) != 2 {
-				return nil, fmt.Errorf("invalid number of arguments")
-			}
-			registry := params[0]
-			repository := params[1]
-			return NewClient(registry, repository, opts...)
+		NewClient: func(params packages.CmdParmas, opts []hclient.Option) (packages.Client, error) {
+			registry := params.Registry
+			repository := params.Repository
+			return NewClient(registry, repository, "", opts...)
 		},
 	}
 
@@ -38,13 +35,10 @@ func (c clientProvider) NewDelete(ctx context.Context) *packages.Cmd {
 // NewPull implements packages.CmdProvider.
 func (c clientProvider) NewPull(ctx context.Context) *packages.Cmd {
 	cmd := &packages.Cmd{
-		NewClient: func(params []string, opts []hclient.Option) (packages.Client, error) {
-			if len(params) != 2 {
-				return nil, fmt.Errorf("invalid number of arguments")
-			}
-			registry := params[0]
-			repository := params[1]
-			return NewClient(registry, repository, opts...)
+		NewClient: func(params packages.CmdParmas, opts []hclient.Option) (packages.Client, error) {
+			registry := params.Registry
+			repository := params.Repository
+			return NewClient(registry, repository, "", opts...)
 		},
 	}
 
@@ -54,15 +48,13 @@ func (c clientProvider) NewPull(ctx context.Context) *packages.Cmd {
 // NewPush implements packages.CmdProvider.
 func (c clientProvider) NewPush(ctx context.Context) *packages.Cmd {
 	cmd := &packages.Cmd{
-		Usage:   fmt.Sprintf("push [repository] [path]"),
-		ArgsLen: 2,
-		NewClient: func(params []string, opts []hclient.Option) (packages.Client, error) {
-			if len(params) != 2 {
-				return nil, fmt.Errorf("invalid number of arguments")
-			}
-			registry := params[0]
-			repository := params[1]
-			return NewClient(registry, repository, opts...)
+		Usage:   fmt.Sprintf("push [repository] [remote-path] [local-file]"),
+		ArgsLen: 3,
+		NewClient: func(params packages.CmdParmas, opts []hclient.Option) (packages.Client, error) {
+			registry := params.Registry
+			repository := params.Repository
+			remotePath := params.ExtraArgs[0]
+			return NewClient(registry, repository, remotePath, opts...)
 		},
 	}
 

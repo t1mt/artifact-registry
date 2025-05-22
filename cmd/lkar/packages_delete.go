@@ -48,7 +48,7 @@ func newPkgDeleteCmd(typ string) *cobra.Command {
 			if err != nil {
 				return err
 			}
-			c, err = cli.NewDelete(cmd.Context()).NewClient([]string{registry, repository}, opts)
+			c, err = cli.NewDelete(cmd.Context()).NewClient(packages.NewParams(args), opts)
 			if err != nil {
 				return err
 			}

@@ -29,16 +29,15 @@ import (
 
 	"github.com/opencontainers/go-digest"
 	ocispec "github.com/opencontainers/image-spec/specs-go/v1"
-	"go.linka.cloud/grpc-toolkit/logger"
-	"oras.land/oras-go/v2"
-	"oras.land/oras-go/v2/content/file"
-	"oras.land/oras-go/v2/errdef"
-
 	"go.linka.cloud/artifact-registry/pkg/cache"
 	"go.linka.cloud/artifact-registry/pkg/crypt/aes"
 	"go.linka.cloud/artifact-registry/pkg/mutex"
 	"go.linka.cloud/artifact-registry/pkg/registry"
 	"go.linka.cloud/artifact-registry/pkg/slices"
+	"go.linka.cloud/grpc-toolkit/logger"
+	"oras.land/oras-go/v2"
+	"oras.land/oras-go/v2/content/file"
+	"oras.land/oras-go/v2/errdef"
 )
 
 // global mutex to prevent concurrent access to the same storage
@@ -170,7 +169,7 @@ func (s *storage) Write(ctx context.Context, pkg Artifact) error {
 		ConfigDescriptor: &cfg,
 		Layers:           []ocispec.Descriptor{layer},
 	}
-	img, err := oras.PackManifest(ctx, store, oras.PackManifestVersion1_1_RC4, s.ArtefactTypeRegistry(), opts)
+	img, err := oras.PackManifest(ctx, store, oras.PackManifestVersion1_1, s.ArtefactTypeRegistry(), opts)
 	if err != nil {
 		return err
 	}
@@ -445,7 +444,7 @@ func (s *storage) Init(ctx context.Context) error {
 		}
 		opts.Layers = append(opts.Layers, l)
 	}
-	img, err := oras.PackManifest(ctx, store, oras.PackManifestVersion1_1_RC4, s.ArtefactTypeRegistry(), opts)
+	img, err := oras.PackManifest(ctx, store, oras.PackManifestVersion1_1, s.ArtefactTypeRegistry(), opts)
 	if err != nil {
 		return err
 	}

@@ -19,6 +19,8 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"net/url"
+	"path/filepath"
 	"strings"
 
 	hclient "go.linka.cloud/artifact-registry/pkg/http/client"
@@ -27,7 +29,7 @@ import (
 
 var _ packages.Client = (*client)(nil)
 
-func NewClient(registry, repository string, opts ...hclient.Option) (packages.Client, error) {
+func NewClient(registry, repository, filePath string, opts ...hclient.Option) (packages.Client, error) {
 	if registry == "" {
 		return nil, fmt.Errorf("registry is required")
 	}
@@ -41,6 +43,7 @@ func NewClient(registry, repository string, opts ...hclient.Option) (packages.Cl
 		c:          hclient.New(opts...),
 		repository: repository,
 		base:       strings.TrimSuffix(base, "/"),
+		filePath:   url.PathEscape(filepath.Clean(strings.TrimPrefix(filePath, "/"))),
 	}, nil
 }
 
@@ -48,6 +51,7 @@ type client struct {
 	c          hclient.Client
 	repository string
 	base       string
+	filePath   string
 }
 
 func (c *client) Key(ctx context.Context) (string, error) {
@@ -86,7 +90,7 @@ func (c *client) SetupScript(ctx context.Context) (string, error) {
 }
 
 func (c *client) Push(ctx context.Context, r io.Reader) error {
-	_, err := c.c.Put(ctx, c.path("push"), r)
+	_, err := c.c.Put(ctx, c.path(c.filePath), r)
 	return err
 }
 
@@ -104,5 +108,5 @@ func (c *client) Delete(ctx context.Context, path string) error {
 }
 
 func (c *client) path(parts ...string) string {
-	return fmt.Sprintf("%s/%s", c.base, strings.Join(parts, "/"))
+	return fmt.Sprintf("%s?filename=%s", c.base, strings.Join(parts, "/"))
 }

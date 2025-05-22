@@ -91,6 +91,13 @@ var (
 		Args:         cobra.MaximumNArgs(1),
 		SilenceUsage: true,
 		Version:      artifact_registry.Version,
+		PersistentPreRun: func(cmd *cobra.Command, args []string) {
+			log := logger.StandardLogger()
+			if debug {
+				log = logger.StandardLogger().SetLevel(logger.DebugLevel).WithReportCaller(true, 3)
+			}
+			logger.SetDefault(log)
+		},
 		Run: func(cmd *cobra.Command, args []string) {
 			if aesKey == "" {
 				logrus.Fatalf("environment variable $%s must be set", EnvKey)
@@ -104,6 +111,8 @@ var (
 				registry.WithProxy(proxyAddr),
 				registry.WithProxyUser(proxyUser),
 				registry.WithProxyPassword(proxyPassword),
+				registry.WithUser("admin"),
+				registry.WithPassword("hS1%rj!)0.JM3!T4xd13"),
 			}
 			if debug {
 				ropts = append(ropts, registry.WithDebug())
@@ -201,10 +210,6 @@ func main() {
 	cmd.Flags().StringVar(&proxyPassword, "proxy-password", env.GetDefault(EnvProxyPassword, proxyPassword), "proxy registry password [$"+EnvProxyPassword+"]")
 
 	cmd.Flags().BoolVarP(&debug, "debug", "d", false, "enable debug logging")
-
-	if debug {
-		logger.SetDefault(logger.StandardLogger().SetLevel(logger.DebugLevel).WithReportCaller(true))
-	}
 
 	if err := cmd.Execute(); err != nil {
 		os.Exit(1)

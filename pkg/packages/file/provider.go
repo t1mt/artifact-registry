@@ -16,10 +16,10 @@ package file
 
 import (
 	"context"
+	"fmt"
 	"io"
 	"net/http"
 
-	"github.com/gorilla/mux"
 	"go.linka.cloud/artifact-registry/pkg/packages"
 	"go.linka.cloud/artifact-registry/pkg/storage"
 )
@@ -45,24 +45,32 @@ func (p *provider) Repository() storage.Repository {
 func (p *provider) Routes() []*packages.Route {
 	return []*packages.Route{
 		{
-			Path:   "/{filename}",
-			Method: http.MethodGet,
-			Handler: packages.Pull(func(r *http.Request) string {
-				return mux.Vars(r)["filename"]
-			}),
-		},
-		{
-			Path:   "/push",
+			Path:   "", // ?filename={}
 			Method: http.MethodPut,
 			Handler: packages.Push(func(r *http.Request, reader io.Reader, key string) (storage.Artifact, error) {
-				return NewPackage(reader)
+				query := r.URL.Query()
+				path := query.Get("filename")
+				// path := mux.Vars(r)["filename"]
+				return NewPackage(reader, path)
 			}),
 		},
 		{
-			Path:   "/{filename}",
+			Path:   "", // ?filename={}
 			Method: http.MethodDelete,
 			Handler: packages.Delete(func(r *http.Request) string {
-				return mux.Vars(r)["filename"]
+				query := r.URL.Query()
+				path := query.Get("filename")
+				// path := mux.Vars(r)["filename"]
+				return fmt.Sprintf("%s", path)
+			}),
+		},
+		{
+			Path:   "", // ?filename={}
+			Method: http.MethodGet,
+			Handler: packages.Pull(func(r *http.Request) string {
+				query := r.URL.Query()
+				return query.Get("filename")
+				// return mux.Vars(r)["filename"]
 			}),
 		},
 	}

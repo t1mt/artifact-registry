@@ -16,25 +16,29 @@ package file
 
 import (
 	"encoding/hex"
-	"fmt"
 	"io"
+	"path/filepath"
+	"time"
 
 	"github.com/opencontainers/go-digest"
 	"go.linka.cloud/artifact-registry/pkg/buffer"
 	"go.linka.cloud/artifact-registry/pkg/storage"
-	"helm.sh/helm/v3/pkg/chart"
-	"helm.sh/helm/v3/pkg/chart/loader"
 )
 
 var _ storage.Artifact = (*Package)(nil)
 
 type Package struct {
-	*chart.Metadata `json:",inline"`
-	PkgDigest       string `json:"digest"`
-	PkgSize         int64  `json:"size"`
-	FilePath        string `json:"filePath"`
+	PkgDigest  string `json:"digest"`
+	PkgSize    int64  `json:"size"`
+	FilePath   string `json:"filePath"`
+	FileName   string `json:"name"`
+	UpdateDate int64  `json:"UpdateDate,omitempty"`
 
 	r io.ReadCloser
+}
+
+type FileMetadata struct {
+	Checksum string `json:"checksum"`
 }
 
 func (p *Package) Read(b []byte) (n int, err error) {
@@ -52,11 +56,11 @@ func (p *Package) Close() error {
 }
 
 func (p *Package) Name() string {
-	return p.Metadata.Name
+	return p.FileName
 }
 
 func (p *Package) Path() string {
-	return p.FilePath
+	return filepath.Join(p.FilePath, p.FileName)
 }
 
 func (p *Package) Arch() string {
@@ -64,7 +68,7 @@ func (p *Package) Arch() string {
 }
 
 func (p *Package) Version() string {
-	return p.Metadata.Version
+	return ""
 }
 
 func (p *Package) Size() int64 {
@@ -75,27 +79,22 @@ func (p *Package) Digest() digest.Digest {
 	return digest.NewDigestFromEncoded(digest.SHA256, p.PkgDigest)
 }
 
-func NewPackage(r io.Reader) (*Package, error) {
+func NewPackage(r io.Reader, path string) (*Package, error) {
 	buf, err := buffer.CreateHashedBufferFromReader(r)
 	if err != nil {
-		return nil, err
-	}
-	c, err := loader.LoadArchive(buf)
-	if err != nil {
-		return nil, err
-	}
-	if err := c.Validate(); err != nil {
 		return nil, err
 	}
 	_, _, d, _ := buf.Sums()
 	if _, err := buf.Seek(0, io.SeekStart); err != nil {
 		return nil, err
 	}
+	dir, name := filepath.Split(path)
 	return &Package{
-		Metadata:  c.Metadata,
-		PkgDigest: hex.EncodeToString(d),
-		PkgSize:   buf.Size(),
-		FilePath:  fmt.Sprintf("%s-%s.tgz", c.Metadata.Name, c.Metadata.Version),
-		r:         buf,
+		PkgDigest:  hex.EncodeToString(d),
+		PkgSize:    buf.Size(),
+		FilePath:   dir,
+		FileName:   name,
+		UpdateDate: time.Now().Unix(),
+		r:          buf,
 	}, nil
 }
