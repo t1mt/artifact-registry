@@ -32,7 +32,7 @@ func newPkgSetupCmd(typ string) *cobra.Command {
 		// client func(ctx context.Context, scheme, name string, args []string) (packages.Setuper, error)
 	)
 
-	prvd, err := packages.NewCmdProvider(typ)
+	prvd, err := packages.NewCmd(typ)
 	if err != nil {
 		panic(err)
 	}
@@ -43,32 +43,6 @@ func newPkgSetupCmd(typ string) *cobra.Command {
 	index = cli.ArgsLen
 	use = cli.Usage
 
-	/* switch typ {
-	case apk.Name:
-		use = fmt.Sprintf("setup [repository] [branch] [apk-repository]")
-		args = 3
-		client = func(ctx context.Context, scheme, name string, args []string) (packages.Setuper, error) {
-			return apk.NewClient(registry, repository, args[1], args[2], opts...)
-		}
-	case deb.Name:
-		use = fmt.Sprintf("setup [repository] [distribution] [component]")
-		args = 3
-		client = func(ctx context.Context, scheme, name string, args []string) (packages.Setuper, error) {
-			return deb.NewClient(registry, repository, args[1], args[2], opts...)
-		}
-	case rpm.Name:
-		use = fmt.Sprintf("setup [repository]")
-		args = 1
-		client = func(ctx context.Context, scheme, name string, args []string) (packages.Setuper, error) {
-			return rpm.NewClient(registry, repository, opts...)
-		}
-	case helm.Name:
-		use = fmt.Sprintf("setup [repository]")
-		args = 1
-		client = func(ctx context.Context, scheme, name string, args []string) (packages.Setuper, error) {
-			return helm.NewClient(registry, repository, opts...)
-		}
-	} */
 	cmd := &cobra.Command{
 		Use:   use,
 		Short: fmt.Sprintf("Setup %s repository on the machine", typ),

@@ -60,29 +60,10 @@ func AddCmdProvider(name string, provider CmdProvider) {
 	cmds[name] = provider
 }
 
-func NewCmdProvider(name string) (CmdProvider, error) {
+func NewCmd(name string) (CmdProvider, error) {
 	p, ok := cmds[name]
 	if !ok {
 		return nil, ErrUnknownProvider
 	}
 	return p, nil
 }
-
-/* func NewCmd(ctx context.Context, name string, cmd CmdType) (*Cmd, error) {
-	p, ok := cmds[name]
-	if !ok {
-		return nil, ErrUnknownProvider
-	}
-	switch cmd {
-	case CmdSetup:
-		return p.NewSetup(ctx)
-	case CmdPull:
-		return p.NewPull(ctx)
-	case CmdPush:
-		return p.NewPush(ctx)
-	case CmdDelete:
-		return p.NewDelete(ctx)
-	default:
-		return nil, fmt.Errorf("unsupported package type: %s", name)
-	}
-} */

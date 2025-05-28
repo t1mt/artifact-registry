@@ -85,31 +85,9 @@ func (c *client) Packages(ctx context.Context, typ string) ([]storage.Artifact, 
 		return nil, err
 	}
 	defer res.Body.Close()
-	/* switch ie(typ != "", typ, c.typ) {
-	case apk.Name:
-		var p []*apk.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	case deb.Name:
-		var p []*deb.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	case rpm.Name:
-		var p []*rpm.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	case helm.Name:
-		var p []*helm.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	case file.Name:
-		var p []*file.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	default:
-		return nil, fmt.Errorf("unexpected package type %q", typ)
-	} */
-	cmd, err := packages.NewCmdProvider(c.typ)
+
+	t := ie(typ != "", typ, c.typ)
+	cmd, err := packages.NewCmd(t)
 	if err != nil {
 		return nil, err
 	}
