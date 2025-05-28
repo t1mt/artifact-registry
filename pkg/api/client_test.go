@@ -22,7 +22,6 @@ import (
 
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
 	hclient "go.linka.cloud/artifact-registry/pkg/http/client"
 )
 

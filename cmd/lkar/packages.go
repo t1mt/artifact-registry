@@ -19,11 +19,6 @@ import (
 
 	"github.com/spf13/cobra"
 	"go.linka.cloud/artifact-registry/pkg/packages"
-	_ "go.linka.cloud/artifact-registry/pkg/packages/apk"
-	_ "go.linka.cloud/artifact-registry/pkg/packages/deb"
-	_ "go.linka.cloud/artifact-registry/pkg/packages/file"
-	_ "go.linka.cloud/artifact-registry/pkg/packages/helm"
-	_ "go.linka.cloud/artifact-registry/pkg/packages/rpm"
 )
 
 var PkgGroup = &cobra.Group{ID: "2_packages", Title: "Package Commands:"}

@@ -109,8 +109,7 @@ func (c *client) Packages(ctx context.Context, typ string) ([]storage.Artifact, 
 	default:
 		return nil, fmt.Errorf("unexpected package type %q", typ)
 	} */
-	t := ie(typ != "", typ, c.typ)
-	cmd, err := packages.NewCmdProvider(t)
+	cmd, err := packages.NewCmdProvider(c.typ)
 	if err != nil {
 		return nil, err
 	}

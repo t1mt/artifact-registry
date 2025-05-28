@@ -54,7 +54,7 @@ func TestClientURL(t *testing.T) {
 			name:     "without repo (subpath)",
 			registry: "example.org",
 			filePath: "stable/main",
-			url:      "https://example.org/file/" + RepositoryPublicKey,
+			url:      "https://example.org/file?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
 				_, err := c.Key(ctx)
 				return err
@@ -64,7 +64,7 @@ func TestClientURL(t *testing.T) {
 			name:     "without repo (subdomain)",
 			registry: "file.example.org",
 			filePath: "stable/main",
-			url:      "https://file.example.org/" + RepositoryPublicKey,
+			url:      "https://file.example.org?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
 				_, err := c.Key(ctx)
 				return err
@@ -74,7 +74,7 @@ func TestClientURL(t *testing.T) {
 			name:     "without repo (subdomain other type)",
 			registry: "deb.example.org",
 			filePath: "stable/main",
-			url:      "https://deb.example.org/file/" + RepositoryPublicKey,
+			url:      "https://deb.example.org/file?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
 				_, err := c.Key(ctx)
 				return err
@@ -85,7 +85,7 @@ func TestClientURL(t *testing.T) {
 			registry:   "example.org",
 			repository: "my-repo",
 			filePath:   "stable/main",
-			url:        "https://example.org/file/my-repo/" + RepositoryPublicKey,
+			url:        "https://example.org/file/my-repo?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
 				_, err := c.Key(ctx)
 				return err
@@ -96,7 +96,7 @@ func TestClientURL(t *testing.T) {
 			registry:   "file.example.org",
 			repository: "my-repo",
 			filePath:   "stable/main",
-			url:        "https://file.example.org/my-repo/" + RepositoryPublicKey,
+			url:        "https://file.example.org/my-repo?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
 				_, err := c.Key(ctx)
 				return err
@@ -107,7 +107,7 @@ func TestClientURL(t *testing.T) {
 			registry:   "deb.example.org",
 			repository: "my-repo",
 			filePath:   "stable/main",
-			url:        "https://deb.example.org/file/my-repo/" + RepositoryPublicKey,
+			url:        "https://deb.example.org/file/my-repo?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
 				_, err := c.Key(ctx)
 				return err
