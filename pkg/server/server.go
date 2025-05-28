@@ -24,13 +24,12 @@ import (
 	"time"
 
 	"github.com/gorilla/mux"
-	"go.linka.cloud/grpc-toolkit/logger"
-	"go.linka.cloud/grpc-toolkit/react"
-
 	"go.linka.cloud/artifact-registry/pkg/api"
 	"go.linka.cloud/artifact-registry/pkg/packages"
 	"go.linka.cloud/artifact-registry/pkg/storage"
 	"go.linka.cloud/artifact-registry/ui"
+	"go.linka.cloud/grpc-toolkit/logger"
+	"go.linka.cloud/grpc-toolkit/react"
 )
 
 func Run(ctx context.Context, addr, aesKey, backend, domain, repo, cert, key string, disableUI bool, opts ...storage.Option) error {

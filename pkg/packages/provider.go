@@ -21,7 +21,6 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-
 	"go.linka.cloud/artifact-registry/pkg/storage"
 )
 

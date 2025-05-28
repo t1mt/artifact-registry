@@ -22,11 +22,10 @@ import (
 	"fmt"
 	"net/http"
 
-	"oras.land/oras-go/v2/registry/remote"
-	"oras.land/oras-go/v2/registry/remote/auth"
-
 	auth2 "go.linka.cloud/artifact-registry/pkg/auth"
 	"go.linka.cloud/artifact-registry/pkg/cache"
+	"oras.land/oras-go/v2/registry/remote"
+	"oras.land/oras-go/v2/registry/remote/auth"
 )
 
 const clientID = "lk-artifact-registry"
@@ -119,6 +118,24 @@ func (o options) apply(ctx context.Context, r *remote.Repository) {
 func WithClientID(id string) Option {
 	return func(o *options) {
 		o.clientID = id
+	}
+}
+
+func WithUser(user string) Option {
+	return func(o *options) {
+		if o.creds == nil {
+			o.creds = &creds{}
+		}
+		o.creds.user = user
+	}
+}
+
+func WithPassword(passwd string) Option {
+	return func(o *options) {
+		if o.creds == nil {
+			o.creds = &creds{}
+		}
+		o.creds.password = passwd
 	}
 }
 
