@@ -111,8 +111,6 @@ var (
 				registry.WithProxy(proxyAddr),
 				registry.WithProxyUser(proxyUser),
 				registry.WithProxyPassword(proxyPassword),
-				registry.WithUser("admin"),
-				registry.WithPassword("hS1%rj!)0.JM3!T4xd13"),
 			}
 			if debug {
 				ropts = append(ropts, registry.WithDebug())

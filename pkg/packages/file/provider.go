@@ -19,6 +19,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 
 	"go.linka.cloud/artifact-registry/pkg/packages"
 	"go.linka.cloud/artifact-registry/pkg/storage"
@@ -69,7 +70,8 @@ func (p *provider) Routes() []*packages.Route {
 			Method: http.MethodGet,
 			Handler: packages.Pull(func(r *http.Request) string {
 				query := r.URL.Query()
-				return query.Get("filename")
+				filename := query.Get("filename")
+				return strings.TrimPrefix(filename, "/")
 				// return mux.Vars(r)["filename"]
 			}),
 		},
