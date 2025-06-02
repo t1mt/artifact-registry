@@ -27,7 +27,7 @@ require (
 	go.linka.cloud/printer v0.0.0-20240221170110-7ea9393f148f
 	golang.org/x/sync v0.14.0
 	golang.org/x/term v0.32.0
-	helm.sh/helm/v3 v3.18.0
+	helm.sh/helm/v3 v3.18.2
 	oras.land/oras-go/v2 v2.6.0
 	sigs.k8s.io/yaml v1.4.0
 )
