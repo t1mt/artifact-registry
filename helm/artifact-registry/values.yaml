@@ -47,6 +47,10 @@ config:
     # a secret is expected with the key ca.crt
     # clientCA: "some-client-ca"
 
+  registry: {}
+    # username: 
+    # password: 
+
   # proxy:
   #   host: "docker-proxy.example.org"
   #   insecure: false
@@ -152,7 +156,7 @@ registry:
   nameOverride: "docker-registry"
   secrets:
     # username: admin, password: admin
-    htpasswd: admin:$2y$05$J9ff/uoy4VUxmW8CvTuxN.dstra1DvTJYO8qMGCGdQS0JkiFs04fO
+    # htpasswd: admin:$2y$05$J9ff/uoy4VUxmW8CvTuxN.dstra1DvTJYO8qMGCGdQS0JkiFs04fO
   garbageCollect:
     enabled: false
 

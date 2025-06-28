@@ -88,6 +88,18 @@ spec:
               name: {{ include "artifact-registry.fullname" . }}-proxy-auth
               key: password
           {{- end }}
+          {{- if or (.Values.config.registry).username (.Values.config.registry).password }}
+        - name: ARTIFACT_REGISTRY_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "artifact-registry.fullname" . }}-registry-auth
+              key: username
+        - name: ARTIFACT_REGISTRY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "artifact-registry.fullname" . }}-registry-auth
+              key: password
+          {{- end }}
           {{- if .Values.env }}
           {{- toYaml .Values.env | nindent 12 }}
           {{- end }}
