@@ -21,8 +21,8 @@ import (
 	"strings"
 
 	"github.com/gorilla/mux"
-
 	"go.linka.cloud/artifact-registry/pkg/storage"
+	"go.linka.cloud/grpc-toolkit/logger"
 )
 
 var ErrUnknownProvider = errors.New("unknown provider")
@@ -90,6 +90,7 @@ func Init(ctx context.Context, r *mux.Router, domain, repo string) error {
 				}
 			}
 		}
+		logger.C(ctx).Infof("Init Provider %q: %d routes", k, len(p.Routes()))
 	}
 	return nil
 }

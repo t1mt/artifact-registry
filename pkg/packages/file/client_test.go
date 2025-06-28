@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-package api
+package file
 
 import (
 	"context"
@@ -32,6 +32,7 @@ func TestClientURL(t *testing.T) {
 		name       string
 		registry   string
 		repository string
+		filePath   string
 		fn         func(ctx context.Context, c *client) error
 		url        string
 		wantErr    bool
@@ -40,37 +41,42 @@ func TestClientURL(t *testing.T) {
 		{
 			name:       "invalid registry",
 			repository: "my-repo",
+			filePath:   "stable/main",
 			wantErr:    true,
 		},
 		{
 			name:       "with repo",
 			registry:   "example.org",
 			repository: "my-repo",
+			filePath:   "stable/main",
 		},
 		{
 			name:     "without repo (subpath)",
 			registry: "example.org",
-			url:      "https://example.org/_packages/apk",
+			filePath: "stable/main",
+			url:      "https://example.org/file?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
-				_, err := c.Packages(ctx, "apk")
+				_, err := c.Key(ctx)
 				return err
 			},
 		},
 		{
 			name:     "without repo (subdomain)",
-			registry: "apk.example.org",
-			url:      "https://apk.example.org/_packages",
+			registry: "file.example.org",
+			filePath: "stable/main",
+			url:      "https://file.example.org?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
-				_, err := c.Packages(ctx, "apk")
+				_, err := c.Key(ctx)
 				return err
 			},
 		},
 		{
 			name:     "without repo (subdomain other type)",
 			registry: "deb.example.org",
-			url:      "https://deb.example.org/_packages/apk",
+			filePath: "stable/main",
+			url:      "https://deb.example.org/file?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
-				_, err := c.Packages(ctx, "apk")
+				_, err := c.Key(ctx)
 				return err
 			},
 		},
@@ -78,19 +84,21 @@ func TestClientURL(t *testing.T) {
 			name:       "with repo (subpath)",
 			registry:   "example.org",
 			repository: "my-repo",
-			url:        "https://example.org/_packages/apk/my-repo",
+			filePath:   "stable/main",
+			url:        "https://example.org/file/my-repo?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
-				_, err := c.Packages(ctx, "apk")
+				_, err := c.Key(ctx)
 				return err
 			},
 		},
 		{
 			name:       "with repo (subdomain)",
-			registry:   "apk.example.org",
+			registry:   "file.example.org",
 			repository: "my-repo",
-			url:        "https://apk.example.org/_packages/my-repo",
+			filePath:   "stable/main",
+			url:        "https://file.example.org/my-repo?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
-				_, err := c.Packages(ctx, "apk")
+				_, err := c.Key(ctx)
 				return err
 			},
 		},
@@ -98,9 +106,10 @@ func TestClientURL(t *testing.T) {
 			name:       "with repo (subdomain other type)",
 			registry:   "deb.example.org",
 			repository: "my-repo",
-			url:        "https://deb.example.org/_packages/apk/my-repo",
+			filePath:   "stable/main",
+			url:        "https://deb.example.org/file/my-repo?filename=" + RepositoryPublicKey,
 			fn: func(ctx context.Context, c *client) error {
-				_, err := c.Packages(ctx, "apk")
+				_, err := c.Key(ctx)
 				return err
 			},
 		},
@@ -110,7 +119,7 @@ func TestClientURL(t *testing.T) {
 			ctx, cancel := context.WithCancel(context.Background())
 			defer cancel()
 
-			c, err := NewClient(v.registry, v.repository)
+			c, err := NewClient(v.registry, v.repository, v.filePath)
 			if v.wantErr {
 				require.Error(t, err)
 				return

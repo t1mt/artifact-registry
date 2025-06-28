@@ -18,12 +18,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-
 	"go.linka.cloud/artifact-registry/pkg/packages"
-	"go.linka.cloud/artifact-registry/pkg/packages/apk"
-	"go.linka.cloud/artifact-registry/pkg/packages/deb"
-	"go.linka.cloud/artifact-registry/pkg/packages/helm"
-	"go.linka.cloud/artifact-registry/pkg/packages/rpm"
 )
 
 func newPkgDeleteCmd(typ string) *cobra.Command {
@@ -37,18 +32,11 @@ func newPkgDeleteCmd(typ string) *cobra.Command {
 				c   packages.Deleter
 				err error
 			)
-			switch typ {
-			case apk.Name:
-				c, err = apk.NewClient(registry, repository, "", "", opts...)
-			case deb.Name:
-				c, err = deb.NewClient(registry, repository, "", "", opts...)
-			case rpm.Name:
-				c, err = rpm.NewClient(registry, repository, opts...)
-			case helm.Name:
-				c, err = helm.NewClient(registry, repository, opts...)
-			default:
-				return fmt.Errorf("unsupported package type: %s", typ)
+			cli, err := packages.NewCmd(typ)
+			if err != nil {
+				return err
 			}
+			c, err = cli.NewDelete(cmd.Context()).NewClient(packages.NewParams(args), opts)
 			if err != nil {
 				return err
 			}

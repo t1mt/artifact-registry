@@ -31,7 +31,7 @@ spec:
       - name: {{ .Chart.Name }}
         securityContext:
             {{- toYaml .Values.securityContext | nindent 12 }}
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+        image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
         args:
         - "--addr=:{{ default 9887 .Values.config.port }}"
@@ -86,6 +86,18 @@ spec:
           valueFrom:
             secretKeyRef:
               name: {{ include "artifact-registry.fullname" . }}-proxy-auth
+              key: password
+          {{- end }}
+          {{- if or (.Values.config.registry).username (.Values.config.registry).password }}
+        - name: ARTIFACT_REGISTRY_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "artifact-registry.fullname" . }}-registry-auth
+              key: username
+        - name: ARTIFACT_REGISTRY_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ include "artifact-registry.fullname" . }}-registry-auth
               key: password
           {{- end }}
           {{- if .Values.env }}

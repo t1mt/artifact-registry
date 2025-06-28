@@ -22,10 +22,6 @@ import (
 
 	hclient "go.linka.cloud/artifact-registry/pkg/http/client"
 	"go.linka.cloud/artifact-registry/pkg/packages"
-	"go.linka.cloud/artifact-registry/pkg/packages/apk"
-	"go.linka.cloud/artifact-registry/pkg/packages/deb"
-	"go.linka.cloud/artifact-registry/pkg/packages/helm"
-	"go.linka.cloud/artifact-registry/pkg/packages/rpm"
 	"go.linka.cloud/artifact-registry/pkg/storage"
 )
 
@@ -40,7 +36,7 @@ func NewClient(registry string, repo string, opts ...hclient.Option) (Client, er
 		return nil, fmt.Errorf("registry is required")
 	}
 	var typ string
-	for _, v := range packages.Names() {
+	for _, v := range packages.Providers() {
 		if strings.HasPrefix(registry, v+".") {
 			typ = v
 			break
@@ -89,26 +85,14 @@ func (c *client) Packages(ctx context.Context, typ string) ([]storage.Artifact, 
 		return nil, err
 	}
 	defer res.Body.Close()
-	switch ie(typ != "", typ, c.typ) {
-	case apk.Name:
-		var p []*apk.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	case deb.Name:
-		var p []*deb.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	case rpm.Name:
-		var p []*rpm.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	case helm.Name:
-		var p []*helm.Package
-		err := json.NewDecoder(res.Body).Decode(&p)
-		return storage.AsArtifact(p), err
-	default:
-		return nil, fmt.Errorf("unexpected package type %q", typ)
+
+	t := ie(typ != "", typ, c.typ)
+	cmd, err := packages.NewCmd(t)
+	if err != nil {
+		return nil, err
 	}
+	return cmd.MakePackages(res.Body)
+
 }
 
 func (c *client) url(parts ...string) string {

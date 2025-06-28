@@ -39,7 +39,7 @@ var _ storage.Repository = (*repo)(nil)
 type repo struct{}
 
 func (r *repo) Name() string {
-	return "apk"
+	return Name
 }
 
 func (r *repo) GenerateKeypair() (string, string, error) {

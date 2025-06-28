@@ -18,11 +18,7 @@ import (
 	"fmt"
 
 	"github.com/spf13/cobra"
-
-	"go.linka.cloud/artifact-registry/pkg/packages/apk"
-	"go.linka.cloud/artifact-registry/pkg/packages/deb"
-	"go.linka.cloud/artifact-registry/pkg/packages/helm"
-	"go.linka.cloud/artifact-registry/pkg/packages/rpm"
+	"go.linka.cloud/artifact-registry/pkg/packages"
 )
 
 var PkgGroup = &cobra.Group{ID: "2_packages", Title: "Package Commands:"}
@@ -39,14 +35,18 @@ func newPkgCmd(typ string) *cobra.Command {
 		newPkgPushCmd(typ),
 		newPkgPullCmd(typ),
 		newPkgDeleteCmd(typ),
-		newPkgSetupCmd(typ),
 	)
+	// optional
+	setup := newPkgSetupCmd(typ)
+	if setup != nil {
+		pkgCmd.AddCommand(setup)
+	}
 	return pkgCmd
 }
 
 func init() {
 	rootCmd.AddGroup(PkgGroup)
-	for _, v := range []string{apk.Name, deb.Name, rpm.Name, helm.Name} {
+	for _, v := range packages.Providers() {
 		rootCmd.AddCommand(newPkgCmd(v))
 	}
 }

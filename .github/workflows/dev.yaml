@@ -1,0 +1,81 @@
+name: dev
+
+on:
+  pull_request:
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+defaults:
+  run:
+    shell: bash
+jobs:
+  Build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Clone repo
+        uses: actions/checkout@85e6279cec87321a52edac9c87bce653a07cf6c2 #v4.2.2
+      - name: Setup Cosign
+        uses: sigstore/cosign-installer@3454372f43399081ed03b604cb2d021dabca52bb #v3.8.2
+      - name: Setup Helm
+        uses: azure/setup-helm@b9e51907a09c216f16ebe8536097933489208112 #v4.3.0
+        with:
+          version: v3.12.1
+      - name: Setup QEMU
+        uses: docker/setup-qemu-action@737ba1e397ec2caff0d098f75e1136f9a926dc0a #v3.5.0
+      - name: Setup Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@e600775e527acba2317260cadb64b7e19efd5362 #v3.10.0
+      - name: Setup yq
+        uses: frenck/action-setup-yq@c4b5be8b4a215c536a41d436757d9feb92836d4f #v1.0.2
+      - name: Login to GitHub Container Registry
+        uses: docker/login-action@6d4b68b490aef8836e8fb5e50ee7b3bdfa5894f0 #v3.3.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Prepare
+        id: prep
+        run: |
+          VERSION=sha-${GITHUB_SHA::8}
+          if [[ $GITHUB_REF == refs/tags/* ]]; then
+            VERSION=${GITHUB_REF/refs\/tags\//}
+          fi
+          echo "VERSION=${VERSION}" >> $GITHUB_OUTPUT
+      - name: Generate images meta
+        id: meta
+        uses: docker/metadata-action@902fa8ec7d6ecbf8d84d538b9b233a880e428804 #v5.7.0
+        with:
+          images: ghcr.io/t1mt/artifact-registry
+          tags: type=raw,value=${{ steps.prep.outputs.VERSION }}
+      - name: Publish multi-arch image
+        uses: docker/build-push-action@1dc73863535b631f98b2378be8619f83b136f4a0 #v6.17.0
+        id: build
+        with:
+          push: true
+          builder: ${{ steps.buildx.outputs.name }}
+          context: .
+          file: ./Dockerfile
+          platforms: linux/amd64
+          tags: ghcr.io/t1mt/artifact-registry:${{ steps.prep.outputs.VERSION }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: Sign the image with Cosign
+        run: |
+          cosign sign --yes ghcr.io/t1mt/artifact-registry@${{ steps.build.outputs.DIGEST }}
+      # - name: Publish Helm chart to GHCR
+      #   id: helm
+      #   # HELM_VERSION=${{ steps.prep.outputs.VERSION }}
+      #   run: |
+      #     HELM_VERSION=0.0.1-${{ steps.prep.outputs.VERSION }}
+      #     HELM_VERSION=${HELM_VERSION#v}
+      #     sed helm/artifact-registry/Chart.in.yaml -e 's|{{ CHART_VERSION }}|$(HELM_VERSION)|' -e 's|{{ APP_VERSION }}|$(HELM_VERSION)|' > helm/artifact-registry/Chart.yaml
+      #     yq -i '.image.repository = "ghcr.io/t1mt/artifact-registry"' helm/artifact-registry/values.yaml
+      #     yq -i '.image.tag = "${{ steps.build.outputs.DIGEST }}"' helm/artifact-registry/values.yaml
+      #     helm package --app-version ${HELM_VERSION} --version ${HELM_VERSION} helm/artifact-registry
+      #     helm push artifact-registry-${HELM_VERSION}.tgz oci://ghcr.io/t1mt/artifact-registry 2> .digest
+      #     DIGEST=$(cat .digest | awk -F "[, ]+" '/Digest/{print $NF}')
+      #     echo "DIGEST=${DIGEST}" >> $GITHUB_OUTPUT
+      # - name: Sign the Helm chart with Cosign
+      #   run: |
+      #     cosign sign --yes ghcr.io/t1mt/artifact-registry/artifact-registry@${{ steps.helm.outputs.DIGEST }}
