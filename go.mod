@@ -21,7 +21,7 @@ require (
 	github.com/spf13/afero v1.14.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
-	github.com/ulikunitz/xz v0.5.12
+	github.com/ulikunitz/xz v0.5.14
 	go.linka.cloud/env v0.0.0-20230215124643-494dd1a27d3c
 	go.linka.cloud/grpc-toolkit v0.4.4-0.20231026145832-5d6b16a2c2a0
 	go.linka.cloud/printer v0.0.0-20240221170110-7ea9393f148f
